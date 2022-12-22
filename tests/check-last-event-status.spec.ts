@@ -101,6 +101,23 @@ describe('CheckLastEventStatus', () => {
 
         expect(eventStatus.status).toEqual('inReview');
     });
+
+    it('should return status done when now is after review time', async () => {
+        const groupId: string = 'any_group_id';
+        const reviewDurationInHours = 1;
+        const reviewDurationInMS = (reviewDurationInHours * 60 * 60 * 1000);
+
+        const { sut, loadLastEventRepository } = makeSut();
+
+        loadLastEventRepository.output ={
+            endDate: new Date(new Date().getTime() - reviewDurationInMS - 1),
+            reviewDurationInHours
+        }
+
+        const eventStatus = await sut.perform(groupId);
+
+        expect(eventStatus.status).toEqual('done');
+    });
 });
 
 interface ILoadLastEventRepository {
@@ -151,7 +168,11 @@ class CheckLastEventStatus {
         if(event === undefined) return {status: 'done'};
 
         const now = new Date();
-        return (event?.endDate as Date) >= now ? {status: 'active'} : {status: 'inReview'};
+        if((event?.endDate as Date) >= now) return {status: 'active'};
+
+        const reviewDurationInMS = (event.reviewDurationInHours * 60 * 60 * 1000);
+        const reviewDate = new Date(event.endDate.getTime() + reviewDurationInMS);
+        return reviewDate >= now ? {status: 'inReview'} : {status: 'done'};
     }
 
 }
