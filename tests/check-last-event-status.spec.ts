@@ -27,9 +27,9 @@ describe('CheckLastEventStatus', () => {
 
         loadLastEventRepository.output = undefined;
 
-        const status = await sut.perform(groupId);
+        const eventStatus = await sut.perform(groupId);
 
-        expect(status).toBe('done');
+        expect(eventStatus.status).toBe('done');
     });
 
     it('should return status active when now is before event end time', async () => {
@@ -41,9 +41,9 @@ describe('CheckLastEventStatus', () => {
             endDate: new Date(new Date().getTime() + 1)
         };
 
-        const status = await sut.perform(groupId);
+        const eventStatus = await sut.perform(groupId);
 
-        expect(status).toEqual('active');
+        expect(eventStatus.status).toEqual('active');
     });
 
     it('should return status inReview when now is after event end time', async () => {
@@ -55,9 +55,9 @@ describe('CheckLastEventStatus', () => {
             endDate: new Date(new Date().getTime() - 1)
         };
 
-        const status = await sut.perform(groupId);
+        const eventStatus = await sut.perform(groupId);
 
-        expect(status).toEqual('inReview');
+        expect(eventStatus.status).toEqual('inReview');
     });
 });
 
@@ -77,16 +77,18 @@ class LoadLastEventRepositoryMock implements ILoadLastEventRepository {
     }
 }
 
+type EventStatus = { status: string }
+
 class CheckLastEventStatus {
     constructor(private readonly loadLastEventRepository: ILoadLastEventRepository){}
 
-    async perform(groupId: string): Promise<string> {
+    async perform(groupId: string): Promise<EventStatus> {
         const event = await this.loadLastEventRepository.loadLastEvent(groupId);
 
-        if(event === undefined) return 'done';
+        if(event === undefined) return {status: 'done'};
 
         const now = new Date();
-        return (event?.endDate as Date) > now ? 'active' : 'inReview';
+        return (event?.endDate as Date) > now ? {status: 'active'} : {status: 'inReview'};
     }
 
 }
