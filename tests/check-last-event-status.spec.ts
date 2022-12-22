@@ -3,8 +3,11 @@ describe('CheckLastEventStatus', () => {
         const groupId: string = 'any_group_id';
         const loadLastEventRepository = new LoadLastEventRepositoryMock();
         const checkLastEventStatus = new CheckLastEventStatus(loadLastEventRepository);
+
         await checkLastEventStatus.perform(groupId);
+
         expect(loadLastEventRepository.groupId).toBe(groupId);
+        expect(loadLastEventRepository.callsCount).toBe(1);
     });
 });
 
@@ -14,10 +17,12 @@ interface ILoadLastEventRepository {
 
 class LoadLastEventRepositoryMock implements ILoadLastEventRepository {
     groupId?: string;
+    callsCount = 0;
+
     async loadLastEvent(groupId: string): Promise<void> {
         this.groupId = groupId;
+        this.callsCount++;
     }
-
 }
 
 class CheckLastEventStatus {
