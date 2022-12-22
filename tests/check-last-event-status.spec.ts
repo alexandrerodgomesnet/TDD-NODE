@@ -157,7 +157,19 @@ class LoadLastEventRepositoryMock implements ILoadLastEventRepository {
     }
 }
 
-type EventStatus = { status: string }
+class EventStatus {
+    status?: 'done' | 'active' | 'inReview';
+    constructor(event?: {endDate: Date, reviewDurationInHours: number}){
+        if(event === undefined) { this.status = 'done'; return; }
+
+        const now = new Date();
+        if((event?.endDate as Date) >= now) { this.status = 'active'; return; };
+
+        const reviewDurationInMS = (event.reviewDurationInHours * 60 * 60 * 1000);
+        const reviewDate = new Date(event.endDate.getTime() + reviewDurationInMS);
+        this.status = reviewDate >= now ? 'inReview' : 'done';
+    }
+}
 
 class CheckLastEventStatus {
     constructor(private readonly loadLastEventRepository: ILoadLastEventRepository){}
@@ -165,14 +177,7 @@ class CheckLastEventStatus {
     async perform(groupId: string): Promise<EventStatus> {
         const event = await this.loadLastEventRepository.loadLastEvent(groupId);
 
-        if(event === undefined) return {status: 'done'};
-
-        const now = new Date();
-        if((event?.endDate as Date) >= now) return {status: 'active'};
-
-        const reviewDurationInMS = (event.reviewDurationInHours * 60 * 60 * 1000);
-        const reviewDate = new Date(event.endDate.getTime() + reviewDurationInMS);
-        return reviewDate >= now ? {status: 'inReview'} : {status: 'done'};
+        return new EventStatus(event);
     }
 
 }
