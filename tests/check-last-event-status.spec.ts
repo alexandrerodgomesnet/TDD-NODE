@@ -1,9 +1,7 @@
 describe('CheckLastEventStatus', () => {
     it('should get last event data', async () => {
         const groupId: string = 'any_group_id';
-        const loadLastEventRepository = new LoadLastEventRepositoryMock();
-
-        const sut = new CheckLastEventStatus(loadLastEventRepository);
+        const { sut, loadLastEventRepository } = makeSut();
 
         await sut.perform(groupId);
 
@@ -13,10 +11,10 @@ describe('CheckLastEventStatus', () => {
 
     it('should return status done when group has no event', async () => {
         const groupId: string = 'any_group_id';
-        const loadLastEventRepository = new LoadLastEventRepositoryMock();
-        loadLastEventRepository.output = undefined;
 
-        const sut = new CheckLastEventStatus(loadLastEventRepository);
+        const { sut, loadLastEventRepository } = makeSut();
+
+        loadLastEventRepository.output = undefined;
 
         const status = await sut.perform(groupId);
 
@@ -48,4 +46,18 @@ class CheckLastEventStatus {
         return 'done';
     }
 
+}
+
+type SutOutput = {
+    sut: CheckLastEventStatus
+    loadLastEventRepository: LoadLastEventRepositoryMock
+}
+
+const makeSut = (): SutOutput => {
+    const loadLastEventRepository = new LoadLastEventRepositoryMock();
+    const sut = new CheckLastEventStatus(loadLastEventRepository);
+    return {
+        sut,
+        loadLastEventRepository
+    };
 }
