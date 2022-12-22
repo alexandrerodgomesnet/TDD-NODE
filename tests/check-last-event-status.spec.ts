@@ -84,6 +84,23 @@ describe('CheckLastEventStatus', () => {
 
         expect(eventStatus.status).toEqual('inReview');
     });
+
+    it('should return status inReview when now equal to review time', async () => {
+        const groupId: string = 'any_group_id';
+        const reviewDurationInHours = 1;
+        const reviewDurationInMS = (reviewDurationInHours * 60 * 60 * 1000);
+
+        const { sut, loadLastEventRepository } = makeSut();
+
+        loadLastEventRepository.output ={
+            endDate: new Date(new Date().getTime() - reviewDurationInMS),
+            reviewDurationInHours
+        }
+
+        const eventStatus = await sut.perform(groupId);
+
+        expect(eventStatus.status).toEqual('inReview');
+    });
 });
 
 interface ILoadLastEventRepository {
