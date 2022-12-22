@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "jest --passWithNoTests --no-cache --runInBand",
+    "test": "jest --passWithNoTests --no-cache --runInBand tsconfig-paths/register",
     "test:watch": "npm t -- --watchAll",
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix"
@@ -25,6 +25,7 @@
     "mockdate": "^3.0.5",
     "ts-jest": "^29.0.3",
     "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.1.1",
     "typescript": "^4.9.4"
   },
   "dependencies": {

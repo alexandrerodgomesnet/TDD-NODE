@@ -19,7 +19,7 @@
     // },
     "paths": {
         "@src/*": ["./src/*"],
-        "@test/*": ["./test/*"]
+        "@test/*": ["./tests/*"]
     },
     "strict": true,
     "noImplicitOverride": true,
